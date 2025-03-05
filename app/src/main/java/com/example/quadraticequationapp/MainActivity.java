@@ -1,6 +1,11 @@
 package com.example.quadraticequationapp;
 
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -8,7 +13,13 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import java.text.DecimalFormat;
+
 public class MainActivity extends AppCompatActivity {
+
+    private EditText inputA, inputB, inputC;
+    private Button ButtonSolve;
+    private TextView resultTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,5 +31,160 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        inputA = findViewById(R.id.editA_Coef);
+        inputB = findViewById(R.id.editB_Coef);
+        inputC = findViewById(R.id.editC_Coef);
+        ButtonSolve = findViewById(R.id.buttonSolve);
+        resultTextView = findViewById(R.id.textSolution);
+
+        ButtonSolve.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                solveQuadraticEquation();
+            }
+        });
     }
+
+    private void solveQuadraticEquation()
+    {
+        try {
+            String strA = inputA.getText().toString();
+            String strB = inputB.getText().toString();
+            String strC = inputC.getText().toString();
+
+            if (strA.isEmpty() || strB.isEmpty() || strC.isEmpty()) {
+                Toast.makeText(this, "Пожалуйста, введите все коэффициенты", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            validateDecimalPoints(strA);
+            validateDecimalPoints(strB);
+            validateDecimalPoints(strC);
+
+            double a = parseDoubleSafely(strA);
+            double b = parseDoubleSafely(strB);
+            double c = parseDoubleSafely(strC);
+
+            if (Double.isInfinite(a)) {
+                Toast.makeText(this, "Коэффициент 'a' слишком большой или слишком маленький", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (Double.isInfinite(b)) {
+                Toast.makeText(this, "Коэффициент 'a' слишком большой или слишком маленький", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (Double.isInfinite(c)) {
+                Toast.makeText(this, "Коэффициент 'a' слишком большой или слишком маленький", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (a == 0) {
+                if (b == 0) {
+                    if (c == 0) {
+                        resultTextView.setText("Бесконечные решения (тождество)");
+                    } else {
+                        resultTextView.setText("Нет решения (противоречние)");
+                    }
+                } else {
+                    double root = -c / b;
+                    if (Double.isInfinite(root) || Double.isNaN(root)) {
+                        resultTextView.setText("Недопустимый результат (переполнение или неопределенность)");
+                    } else {
+                        resultTextView.setText("Корень линейного уравнения:\nx = " + formatNumber(root));
+                    }
+                }
+            } else {
+
+                double discriminant = b * b - 4 * a * c;
+
+                if (Double.isInfinite(discriminant) || Double.isNaN(discriminant)) {
+                    resultTextView.setText("Неверный дискриминант (переполнение или неопределенность)");
+                    return;
+                }
+
+                if (discriminant > 0) {
+                    double root1 = (-b + Math.sqrt(discriminant)) / (2 * a);
+                    double root2 = (-b - Math.sqrt(discriminant)) / (2 * a);
+                    if (Double.isInfinite(root1) || Double.isInfinite(root2) || Double.isNaN(root1) || Double.isNaN(root2)) {
+                        resultTextView.setText("Недопустимые корни (переполнение или неопределенность)");
+                    } else {
+                        resultTextView.setText("Корни квадратного уравнения:\nx1 = " + formatNumber(root1) + "\nx2 = " + formatNumber(root2));
+                    }
+                } else if (discriminant == 0) {
+                    double root = -b / (2 * a);
+                    if (Double.isInfinite(root) || Double.isNaN(root)) {
+                        resultTextView.setText("Недопустимый корень (переполнение или неопределенность)");
+                    } else {
+                        resultTextView.setText("Корень: x = " + formatNumber(root));
+                    }
+                } else {
+                    double realPart = -b / (2 * a);
+                    double imaginaryPart = Math.sqrt(-discriminant) / (2 * a);
+                    if (Double.isInfinite(realPart) || Double.isInfinite(imaginaryPart) || Double.isNaN(realPart) || Double.isNaN(imaginaryPart)) {
+                        resultTextView.setText("Недопустимые комплексные корни (переполнение или неопределенность)");
+                    } else {
+                        resultTextView.setText("Комлексные корни квадратного уравнения:\nx1 = " + formatNumber(realPart) + " + " + formatNumber(imaginaryPart) + "i,\nx2 = " + formatNumber(realPart) + " - " + formatNumber(imaginaryPart) + "i ");
+                    }
+                }
+            }
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, "Неверный ввод. Пожалуйста, вводите численные значения", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(this, "Возникла ошибка:" + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private double parseDoubleSafely(String str)
+    {
+        try {
+            double value = Double.parseDouble(str);
+            if (Double.isInfinite(value))
+            {
+                throw new NumberFormatException("Значение слишком большое или слишком маленькое");
+            }
+            return value;
+        } catch (NumberFormatException e) {
+            throw new NumberFormatException("Неверный формат чисел");
+        }
+    }
+
+    private void validateDecimalPoints(String input) throws NumberFormatException {
+        int decimalPointCount = 0;
+        for (char ch : input.toCharArray()) {
+            if (ch == '.') {
+                decimalPointCount++;
+                if (decimalPointCount > 1) {
+                    throw new NumberFormatException("Неверный формат чисел: несколько десятичных точек");
+                }
+            }
+        }
+    }
+
+    private String formatNumber(double value)
+    {
+        String strValue = Double.toString(value);
+        int decimalIndex = strValue.indexOf('.');
+
+        if (decimalIndex == -1)
+        {
+            return strValue;
+        }
+        else
+        {
+            int decimalPlaces = strValue.length() - decimalIndex - 1;
+
+            if (decimalPlaces > 4)
+            {
+                DecimalFormat df = new DecimalFormat("#.#####");
+                df.setDecimalSeparatorAlwaysShown(true);
+                return df.format(value);
+            }
+            else
+            {
+                return strValue;
+            }
+        }
+    }
+
 }
