@@ -66,19 +66,6 @@ public class MainActivity extends AppCompatActivity {
             double b = parseDoubleSafely(strB);
             double c = parseDoubleSafely(strC);
 
-            if (Double.isInfinite(a)) {
-                Toast.makeText(this, "Коэффициент 'a' слишком большой или слишком маленький", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (Double.isInfinite(b)) {
-                Toast.makeText(this, "Коэффициент 'a' слишком большой или слишком маленький", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (Double.isInfinite(c)) {
-                Toast.makeText(this, "Коэффициент 'a' слишком большой или слишком маленький", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
             if (a == 0) {
                 if (b == 0) {
                     if (c == 0) {
@@ -88,49 +75,30 @@ public class MainActivity extends AppCompatActivity {
                     }
                 } else {
                     double root = -c / b;
-                    if (Double.isInfinite(root) || Double.isNaN(root)) {
-                        resultTextView.setText("Недопустимый результат (переполнение или неопределенность)");
-                    } else {
-                        resultTextView.setText("Корень линейного уравнения:\nx = " + formatNumber(root));
-                    }
+                    resultTextView.setText("Недопустимый результат (переполнение или неопределенность)");
                 }
             } else {
 
                 double discriminant = b * b - 4 * a * c;
 
-                if (Double.isInfinite(discriminant) || Double.isNaN(discriminant)) {
-                    resultTextView.setText("Неверный дискриминант (переполнение или неопределенность)");
-                    return;
-                }
-
                 if (discriminant > 0) {
                     double root1 = (-b + Math.sqrt(discriminant)) / (2 * a);
                     double root2 = (-b - Math.sqrt(discriminant)) / (2 * a);
-                    if (Double.isInfinite(root1) || Double.isInfinite(root2) || Double.isNaN(root1) || Double.isNaN(root2)) {
-                        resultTextView.setText("Недопустимые корни (переполнение или неопределенность)");
-                    } else {
-                        resultTextView.setText("Корни квадратного уравнения:\nx1 = " + formatNumber(root1) + "\nx2 = " + formatNumber(root2));
-                    }
+                    resultTextView.setText("Корни квадратного уравнения:\nx1 = " + formatNumber(root1) + "\nx2 = " + formatNumber(root2));
+
                 } else if (discriminant == 0) {
                     double root = -b / (2 * a);
-                    if (Double.isInfinite(root) || Double.isNaN(root)) {
-                        resultTextView.setText("Недопустимый корень (переполнение или неопределенность)");
-                    } else {
-                        resultTextView.setText("Корень: x = " + formatNumber(root));
-                    }
-                } else {
-                    double realPart = -b / (2 * a);
-                    double imaginaryPart = Math.sqrt(-discriminant) / (2 * a);
-                    if (Double.isInfinite(realPart) || Double.isInfinite(imaginaryPart) || Double.isNaN(realPart) || Double.isNaN(imaginaryPart)) {
-                        resultTextView.setText("Недопустимые комплексные корни (переполнение или неопределенность)");
-                    } else {
-                        resultTextView.setText("Комлексные корни квадратного уравнения:\nx1 = " + formatNumber(realPart) + " + " + formatNumber(imaginaryPart) + "i,\nx2 = " + formatNumber(realPart) + " - " + formatNumber(imaginaryPart) + "i ");
+                    resultTextView.setText("Корень: x = " + formatNumber(root));
+
+                } else
+                {
+                    resultTextView.setText("Нет корней");
                     }
                 }
             }
-        } catch (NumberFormatException e) {
+            catch (NumberFormatException e) {
             Toast.makeText(this, "Неверный ввод. Пожалуйста, вводите численные значения", Toast.LENGTH_SHORT).show();
-        } catch (Exception e) {
+            } catch (Exception e) {
             Toast.makeText(this, "Возникла ошибка:" + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
