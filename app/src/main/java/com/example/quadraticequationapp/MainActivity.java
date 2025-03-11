@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 } else {
                     double root = -c / b;
-                    resultTextView.setText("Недопустимый результат (переполнение или неопределенность)");
+                    resultTextView.setText("Корень линейного уравнения:\nx = " + formatNumber(root)");
                 }
             } else {
 
